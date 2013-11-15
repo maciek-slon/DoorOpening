@@ -1,0 +1,79 @@
+<Task>
+	<!-- reference task information -->
+	<Reference>
+		<Author>
+			<name>Maciej Stefańczyk</name>
+			<link></link>
+		</Author>
+		
+		<Description>
+			<brief>ecovi:t1/Threshold</brief>
+			<full>Example of image thresholding</full>	
+		</Description>
+	</Reference>
+	
+	<!-- task definition -->
+	<Subtasks>
+		<Subtask name="Main">
+			<Executor name="Processing"  period="0.2">
+				<Component name="Sequence" type="CvBasic:Sequence" priority="1" bump="0">
+					<param name="sequence.directory">%[TASK_LOCATION]%/../data/</param>
+					<param name="sequence.pattern">.*\.png</param>
+					<param name="mode.loop">1</param>
+					<param name="mode.iterate">1</param>
+				</Component>
+				
+				<Component name="Color" type="CvBasic:CvColorConv" priority="2" bump="0">
+					<param name="type">BGR2GRAY</param>			
+				</Component>
+
+				<Component name="Morph" type="CvBasic:CvMorphology" priority="3" bump="0">			
+				</Component>
+
+				<Component name="Threshold" type="CvBasic:CvAdaptiveThreshold" priority="60" bump="0">
+				</Component>
+				
+				<Component name="Canny" type="CvBasic:CvCanny" priority="70" bump="0">
+				</Component>
+
+				<Component name="Hough" type="CvBasic:CvHoughLines" priority="80" bump="5">			
+				</Component>
+			</Executor>
+
+			<Executor name="Visualization" period="0.2">
+				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
+					<param name="count">1</param>
+					<param name="title">Okienko</param>
+				</Component>
+			</Executor>
+		</Subtask>	
+	
+	</Subtasks>
+	
+	<!-- pipes connecting datastreams -->
+	<DataStreams>
+		<Source name="Sequence.out_img">
+			<sink>Color.in_img</sink>		
+			<sink>Window.in_img</sink>
+		</Source>
+		<Source name="Color.out_img">
+			<sink>Morph.in_img</sink>	
+		</Source>
+		<Source name="Morph.out_img">
+			<sink>Threshold.in_img</sink>	
+		</Source>
+		<Source name="Threshold.out_img">
+			<sink>Canny.in_img</sink>		
+		</Source>
+		<Source name="Canny.out_img">
+			<sink>Hough.in_img</sink>		
+		</Source>		
+		<Source name="Hough.out_lines">
+			<sink>Window.in_draw</sink>	
+		</Source>
+	</DataStreams>
+</Task>
+
+
+
+
