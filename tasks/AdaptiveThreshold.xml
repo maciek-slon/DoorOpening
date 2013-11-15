@@ -57,7 +57,7 @@
 			<sink>Window.in_img</sink>
 		</Source>
 		<Source name="Color.out_img">
-			<sink>Morph.in_img</sink>	
+			<sink>Canny.in_img</sink>	
 		</Source>
 		<Source name="Morph.out_img">
 			<sink>Threshold.in_img</sink>	
