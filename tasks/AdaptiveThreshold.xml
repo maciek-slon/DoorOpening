@@ -36,7 +36,10 @@
 				<Component name="Canny" type="CvBasic:CvCanny" priority="70" bump="0">
 				</Component>
 
-				<Component name="Hough" type="CvBasic:CvHoughLines" priority="80" bump="5">			
+				<Component name="Hough" type="CvBasic:CvHoughLines" priority="80" bump="0">
+				</Component>
+				
+				<Component name="Vanish" type="DoorOpening:VanishingPointsEstimator" priority="90" bump="0">
 				</Component>
 			</Executor>
 
@@ -67,8 +70,11 @@
 		</Source>
 		<Source name="Canny.out_img">
 			<sink>Hough.in_img</sink>		
-		</Source>		
+		</Source>
 		<Source name="Hough.out_lines">
+			<sink>Vanish.in_lines</sink>	
+		</Source>		
+		<Source name="Vanish.out_lines">
 			<sink>Window.in_draw</sink>	
 		</Source>
 	</DataStreams>
