@@ -59,7 +59,7 @@ void VanishingPointsEstimator::onNewLines() {
 	Types::DrawableContainer lines = in_lines.read();
 	Types::Line * line;
 
-	std::vector<Line*> lines_v, lines_h;
+	std::vector<Types::Line*> lines_v, lines_h;
 
 	for (int i = 0; i < lines.size(); ++i) {
 		line = static_cast<Types::Line*>(lines.get(i));

@@ -26,13 +26,17 @@
 				<Component name="Color" type="CvBasic:CvColorConv" priority="2" bump="0">
 					<param name="type">BGR2GRAY</param>			
 				</Component>
-
-				<Component name="Morph" type="CvBasic:CvMorphology" priority="3" bump="0">			
-				</Component>
+		
 
 				<Component name="Threshold" type="CvBasic:CvAdaptiveThreshold" priority="60" bump="0">
 				</Component>
 				
+				<Component name="Morph" type="CvBasic:CvMorphology" priority="65" bump="0">	</Component>
+				
+				<Component name="Morph2" type="CvBasic:CvMorphology" priority="66" bump="0">	</Component>
+				
+				<Component name="Morph3" type="CvBasic:CvMorphology" priority="67" bump="0">	</Component>
+
 				<Component name="Canny" type="CvBasic:CvCanny" priority="70" bump="0">
 				</Component>
 
@@ -45,8 +49,8 @@
 
 			<Executor name="Visualization" period="0.2">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">1</param>
-					<param name="title">Okienko</param>
+					<param name="count">3</param>
+					<param name="title">In,Thr,Lines</param>
 				</Component>
 			</Executor>
 		</Subtask>	
@@ -57,16 +61,24 @@
 	<DataStreams>
 		<Source name="Sequence.out_img">
 			<sink>Color.in_img</sink>		
-			<sink>Window.in_img</sink>
+			<sink>Window.in_img0</sink>
+			<sink>Window.in_img2</sink>
 		</Source>
 		<Source name="Color.out_img">
 			<sink>Canny.in_img</sink>	
-		</Source>
-		<Source name="Morph.out_img">
-			<sink>Threshold.in_img</sink>	
+			<sink>Threshold.in_img</sink>
 		</Source>
 		<Source name="Threshold.out_img">
-			<sink>Canny.in_img</sink>		
+			<sink>Morph.in_img</sink>	
+		</Source>
+		<Source name="Morph.out_img">
+			<sink>Morph2.in_img</sink>		
+		</Source>
+		<Source name="Morph2.out_img">
+			<sink>Morph3.in_img</sink>		
+		</Source>
+		<Source name="Morph3.out_img">
+			<sink>Window.in_img1</sink>		
 		</Source>
 		<Source name="Canny.out_img">
 			<sink>Hough.in_img</sink>		
@@ -75,7 +87,7 @@
 			<sink>Vanish.in_lines</sink>	
 		</Source>		
 		<Source name="Vanish.out_lines">
-			<sink>Window.in_draw</sink>	
+			<sink>Window.in_draw2</sink>	
 		</Source>
 	</DataStreams>
 </Task>
