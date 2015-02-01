@@ -1,0 +1,34 @@
+<Task>
+	<!-- reference task information -->
+	<Reference>
+		<Author>
+			<name>Maciej Stefańczyk</name>
+			<link></link>
+		</Author>
+		
+		<Description>
+			<brief>ecovi:t1/Threshold</brief>
+			<full>Example of image thresholding</full>	
+		</Description>
+	</Reference>
+	
+	<!-- task definition -->
+	<Subtasks>
+		<Subtask name="Main">
+			<Executor name="Proxy"  period="0.1">
+				<Component name="Proxy" type="DoorOpening:ROSProxy" priority="1" bump="0">
+				</Component>
+			</Executor>
+		</Subtask>	
+	
+	</Subtasks>
+	
+	<!-- pipes connecting datastreams -->
+	<DataStreams>
+		
+	</DataStreams>
+</Task>
+
+
+
+
