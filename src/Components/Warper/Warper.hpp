@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef ROSPROXY_HPP_
-#define ROSPROXY_HPP_
+#ifndef WARPER_HPP_
+#define WARPER_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -13,33 +13,31 @@
 #include "Property.hpp"
 #include "EventHandler2.hpp"
 
-#include "ros/ros.h"
-#include "std_msgs/Int32.h"
-#include "tf/transform_listener.h"
-#include "tf/transform_broadcaster.h"
+#include "Types/CameraInfo.hpp"
 
 #include <opencv2/opencv.hpp>
 
+
 namespace Processors {
-namespace ROSProxy {
+namespace Warper {
 
 /*!
- * \class ROSProxy
- * \brief ROSProxy processor class.
+ * \class Warper
+ * \brief Warper processor class.
  *
  * 
  */
-class ROSProxy: public Base::Component {
+class Warper: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	ROSProxy(const std::string & name = "ROSProxy");
+	Warper(const std::string & name = "Warper");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~ROSProxy();
+	virtual ~Warper();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -72,11 +70,12 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<cv::Vec3d> lockPosition;
+	Base::DataStreamIn<cv::Mat> in_img;
+	Base::DataStreamIn<cv::Mat> in_transform;
+	Base::DataStreamIn<Types::CameraInfo> in_camerainfo;
 
 	// Output data streams
-	Base::DataStreamOut<cv::Mat> transform;
+	Base::DataStreamOut<cv::Mat> out_img;
 
 	// Handlers
 
@@ -84,26 +83,16 @@ protected:
 
 	
 	// Handlers
-	void spin();
-	void onNewData();
-	void onTrigger();
-	
-	ros::Publisher pub;
-	ros::Subscriber sub;
-	ros::NodeHandle * nh;
-	
-	tf::TransformListener * listener;
-
-	void callback(const std_msgs::Int32ConstPtr& msg);
+	void onNewImage();
 
 };
 
-} //: namespace ROSProxy
+} //: namespace Warper
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("ROSProxy", Processors::ROSProxy::ROSProxy)
+REGISTER_COMPONENT("Warper", Processors::Warper::Warper)
 
-#endif /* ROSPROXY_HPP_ */
+#endif /* WARPER_HPP_ */

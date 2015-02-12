@@ -18,7 +18,7 @@
 			<Executor name="Processing"  period="0.2">
 				<Component name="Sequence" type="CvBasic:Sequence" priority="1" bump="0">
 					<param name="sequence.directory">%[TASK_LOCATION]%/../data/</param>
-					<param name="sequence.pattern">.*\.png</param>
+					<param name="sequence.pattern">frame.*\.jpg</param>
 					<param name="mode.loop">1</param>
 					<param name="mode.iterate">1</param>
 				</Component>
@@ -49,8 +49,8 @@
 
 			<Executor name="Visualization" period="0.2">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">3</param>
-					<param name="title">In,Thr,Lines</param>
+					<param name="count">4</param>
+					<param name="title">In,Thr,Lines,Canny</param>
 				</Component>
 			</Executor>
 		</Subtask>	
@@ -65,7 +65,6 @@
 			<sink>Window.in_img2</sink>
 		</Source>
 		<Source name="Color.out_img">
-			<sink>Canny.in_img</sink>	
 			<sink>Threshold.in_img</sink>
 		</Source>
 		<Source name="Threshold.out_img">
@@ -79,9 +78,11 @@
 		</Source>
 		<Source name="Morph3.out_img">
 			<sink>Window.in_img1</sink>		
+			<sink>Canny.in_img</sink>	
 		</Source>
 		<Source name="Canny.out_img">
-			<sink>Hough.in_img</sink>		
+			<sink>Hough.in_img</sink>
+			<sink>Window.in_img3</sink>
 		</Source>
 		<Source name="Hough.out_lines">
 			<sink>Vanish.in_lines</sink>	

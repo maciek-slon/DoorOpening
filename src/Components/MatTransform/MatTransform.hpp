@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef ROSPROXY_HPP_
-#define ROSPROXY_HPP_
+#ifndef MATTRANSFORM_HPP_
+#define MATTRANSFORM_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -13,33 +13,29 @@
 #include "Property.hpp"
 #include "EventHandler2.hpp"
 
-#include "ros/ros.h"
-#include "std_msgs/Int32.h"
-#include "tf/transform_listener.h"
-#include "tf/transform_broadcaster.h"
-
 #include <opencv2/opencv.hpp>
 
+
 namespace Processors {
-namespace ROSProxy {
+namespace MatTransform {
 
 /*!
- * \class ROSProxy
- * \brief ROSProxy processor class.
+ * \class MatTransform
+ * \brief MatTransform processor class.
  *
  * 
  */
-class ROSProxy: public Base::Component {
+class MatTransform: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	ROSProxy(const std::string & name = "ROSProxy");
+	MatTransform(const std::string & name = "MatTransform");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~ROSProxy();
+	virtual ~MatTransform();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -72,38 +68,29 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<cv::Vec3d> lockPosition;
+	Base::DataStreamIn<cv::Mat> in_img;
+	Base::DataStreamIn<cv::Mat, Base::DataStreamBuffer::Newest> in_transform;
+	Base::DataStreamIn<cv::Point2f, Base::DataStreamBuffer::Newest> in_point;
 
 	// Output data streams
-	Base::DataStreamOut<cv::Mat> transform;
+	Base::DataStreamOut<cv::Mat> out_img;
+	Base::DataStreamOut<cv::Vec3d> lockPosition;
 
 	// Handlers
 
 	// Properties
-
 	
 	// Handlers
-	void spin();
-	void onNewData();
-	void onTrigger();
-	
-	ros::Publisher pub;
-	ros::Subscriber sub;
-	ros::NodeHandle * nh;
-	
-	tf::TransformListener * listener;
-
-	void callback(const std_msgs::Int32ConstPtr& msg);
+	void onNewImage();
 
 };
 
-} //: namespace ROSProxy
+} //: namespace MatTransform
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("ROSProxy", Processors::ROSProxy::ROSProxy)
+REGISTER_COMPONENT("MatTransform", Processors::MatTransform::MatTransform)
 
-#endif /* ROSPROXY_HPP_ */
+#endif /* MATTRANSFORM_HPP_ */

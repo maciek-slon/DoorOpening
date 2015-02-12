@@ -2,3 +2,11 @@
 ADD_COMPONENT(VanishingPointsEstimator)
 
 ADD_COMPONENT(ROSProxy)
+
+ADD_COMPONENT(MatTransform)
+
+ADD_COMPONENT(TransformGenerator)
+
+ADD_COMPONENT(Stitcher)
+
+ADD_COMPONENT(Warper)

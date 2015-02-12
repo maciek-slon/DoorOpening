@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef ROSPROXY_HPP_
-#define ROSPROXY_HPP_
+#ifndef STITCHER_HPP_
+#define STITCHER_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -13,33 +13,30 @@
 #include "Property.hpp"
 #include "EventHandler2.hpp"
 
-#include "ros/ros.h"
-#include "std_msgs/Int32.h"
-#include "tf/transform_listener.h"
-#include "tf/transform_broadcaster.h"
-
 #include <opencv2/opencv.hpp>
+#include <opencv2/stitching/stitcher.hpp>
+
 
 namespace Processors {
-namespace ROSProxy {
+namespace Stitcher {
 
 /*!
- * \class ROSProxy
- * \brief ROSProxy processor class.
+ * \class Stitcher
+ * \brief Stitcher processor class.
  *
  * 
  */
-class ROSProxy: public Base::Component {
+class Stitcher: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	ROSProxy(const std::string & name = "ROSProxy");
+	Stitcher(const std::string & name = "Stitcher");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~ROSProxy();
+	virtual ~Stitcher();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -72,11 +69,12 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<cv::Vec3d> lockPosition;
+	Base::DataStreamIn<cv::Mat, Base::DataStreamBuffer::Newest> in_img;
+	Base::DataStreamIn<cv::Mat, Base::DataStreamBuffer::Newest> in_depth;
 
 	// Output data streams
-	Base::DataStreamOut<cv::Mat> transform;
+	Base::DataStreamOut<cv::Mat> out_img;
+	Base::DataStreamOut<cv::Mat> out_depth;
 
 	// Handlers
 
@@ -84,26 +82,20 @@ protected:
 
 	
 	// Handlers
-	void spin();
-	void onNewData();
-	void onTrigger();
+	void onNewImage();
+	void stitch();
 	
-	ros::Publisher pub;
-	ros::Subscriber sub;
-	ros::NodeHandle * nh;
-	
-	tf::TransformListener * listener;
-
-	void callback(const std_msgs::Int32ConstPtr& msg);
+private:
+	std::vector<cv::Mat> m_imgs;
 
 };
 
-} //: namespace ROSProxy
+} //: namespace Stitcher
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("ROSProxy", Processors::ROSProxy::ROSProxy)
+REGISTER_COMPONENT("Stitcher", Processors::Stitcher::Stitcher)
 
-#endif /* ROSPROXY_HPP_ */
+#endif /* STITCHER_HPP_ */

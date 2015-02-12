@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef ROSPROXY_HPP_
-#define ROSPROXY_HPP_
+#ifndef TRANSFORMGENERATOR_HPP_
+#define TRANSFORMGENERATOR_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -13,33 +13,29 @@
 #include "Property.hpp"
 #include "EventHandler2.hpp"
 
-#include "ros/ros.h"
-#include "std_msgs/Int32.h"
-#include "tf/transform_listener.h"
-#include "tf/transform_broadcaster.h"
-
 #include <opencv2/opencv.hpp>
 
+
 namespace Processors {
-namespace ROSProxy {
+namespace TransformGenerator {
 
 /*!
- * \class ROSProxy
- * \brief ROSProxy processor class.
+ * \class TransformGenerator
+ * \brief TransformGenerator processor class.
  *
  * 
  */
-class ROSProxy: public Base::Component {
+class TransformGenerator: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	ROSProxy(const std::string & name = "ROSProxy");
+	TransformGenerator(const std::string & name = "TransformGenerator");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~ROSProxy();
+	virtual ~TransformGenerator();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -72,38 +68,30 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<cv::Vec3d> lockPosition;
+	Base::DataStreamIn<Base::UnitType> trigger;
 
 	// Output data streams
-	Base::DataStreamOut<cv::Mat> transform;
+	Base::DataStreamOut<cv::Mat> out_transform;
 
 	// Handlers
 
 	// Properties
+	Base::Property<float> x;
+	Base::Property<float> y;
+	Base::Property<float> z;
 
 	
 	// Handlers
-	void spin();
-	void onNewData();
-	void onTrigger();
-	
-	ros::Publisher pub;
-	ros::Subscriber sub;
-	ros::NodeHandle * nh;
-	
-	tf::TransformListener * listener;
-
-	void callback(const std_msgs::Int32ConstPtr& msg);
+	void step();
 
 };
 
-} //: namespace ROSProxy
+} //: namespace TransformGenerator
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("ROSProxy", Processors::ROSProxy::ROSProxy)
+REGISTER_COMPONENT("TransformGenerator", Processors::TransformGenerator::TransformGenerator)
 
-#endif /* ROSPROXY_HPP_ */
+#endif /* TRANSFORMGENERATOR_HPP_ */
