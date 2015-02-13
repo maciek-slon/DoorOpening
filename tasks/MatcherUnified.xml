@@ -23,17 +23,17 @@
 					<param name="mode.auto_next_image">0</param>
 				</Component>
 
-				<Component name="Object" type="CameraGigE:CameraGigE" priority="1" bump="0">
+<!--				<Component name="Object" type="CameraGigE:CameraGigE" priority="1" bump="0">
 					<param name="device.address">192.168.1.2</param>
 					<param name="image.exposure.mode">Manual</param>
 					<param name="image.exposure.value">0.025</param>
-				</Component>
-<!--				<Component name="Object" type="CvBasic:Sequence" priority="2" bump="0">
+				</Component>-->
+				<Component name="Object" type="CvBasic:Sequence" priority="2" bump="0">
 					<param name="sequence.directory">%[TASK_LOCATION]%/../data/zamki/dzien/</param>
 					<param name="sequence.pattern">frame.*\.jpg</param>
 					<param name="mode.loop">1</param>
 					<param name="mode.auto_next_image">0</param>
-				</Component>-->
+				</Component>
 				
 				<Component name="ModelColor" type="CvBasic:CvColorConv" priority="3">
 					<param name="type">BGR2GRAY</param>
@@ -46,10 +46,7 @@
 				<Component name="Canny" type="CvBasic:CvCanny" priority="5" bump="0">
 				</Component>
 				
-				<Component name="ModelFeatures" type="CvBasic:CvORB" priority="30">
-				</Component>
-				
-				<Component name="ObjectFeatures" type="CvBasic:CvORB" priority="30">
+				<Component name="Features" type="CvBasic:FeatureDetector" priority="30">
 				</Component>
 				
 				<Component name="Matcher" type="CvBasic:CvBruteForce" priority="40">
@@ -91,7 +88,7 @@
 		</Source>
 		
 		<Source name="ModelColor.out_img">
-			<sink>ModelFeatures.in_img</sink>
+			<sink>Features.in_img_A</sink>
 			<sink>Canny.in_img</sink>
 		</Source>
 		
@@ -99,12 +96,12 @@
 			<sink>Transform.in_img</sink>
 		</Source>
 		
-		<Source name="ModelFeatures.out_features">
+		<Source name="Features.out_features_A">
 			<sink>Matcher.in_features0</sink>
 			<sink>Calc.in_features0</sink>
 		</Source>
 		
-		<Source name="ModelFeatures.out_descriptors">
+		<Source name="Features.out_descriptors_A">
 			<sink>Matcher.in_descriptors0</sink>
 		</Source>
 		
@@ -116,15 +113,15 @@
 		</Source>
 		
 		<Source name="ObjectColor.out_img">
-			<sink>ObjectFeatures.in_img</sink>
+			<sink>Features.in_img_B</sink>
 		</Source>
 		
-		<Source name="ObjectFeatures.out_features">
+		<Source name="Features.out_features_B">
 			<sink>Matcher.in_features1</sink>
 			<sink>Calc.in_features1</sink>
 		</Source>
 		
-		<Source name="ObjectFeatures.out_descriptors">
+		<Source name="Features.out_descriptors_B">
 			<sink>Matcher.in_descriptors1</sink>
 		</Source>
 		

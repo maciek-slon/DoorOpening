@@ -10,3 +10,5 @@ ADD_COMPONENT(TransformGenerator)
 ADD_COMPONENT(Stitcher)
 
 ADD_COMPONENT(Warper)
+
+ADD_COMPONENT(ModelReader)
