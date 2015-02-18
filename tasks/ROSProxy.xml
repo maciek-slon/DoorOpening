@@ -31,6 +31,10 @@
 					<param name="depth_mode">point_cloud</param>
 				</Component>
 				
+				<Component name="ProcValid" type="CameraNUI:DepthConverter" priority="4" bump="0">
+					<param name="depth_mode">valid</param>
+				</Component>
+				
 				<Component name="Proxy" type="DoorOpening:ROSProxy" priority="10" bump="0">
 				</Component>
 				<!--<Component name="Proxy" type="DoorOpening:TransformGenerator" priority="10" bump="0">
@@ -39,11 +43,14 @@
 				<Component name="Transformer" type="DoorOpening:MatTransform" priority="20" bump="0">
 				</Component>
 				
-				<Component name="Stitcher" type="DoorOpening:Stitcher" priority="30" bump="0">
+				<Component name="PassThrough" type="Depth:PassThrough" priority="30" bump="0">
+					<param name="z_min">0.1</param>
+					<param name="z_max">1.9</param>
 				</Component>
 				
-				<Component name="Warper" type="DoorOpening:Warper" priority="40" bump="0">
+				<Component name="Mask" type="CvBasic:MaskAggregator" priority="40" bump="0">
 				</Component>
+
 			</Executor>
 			
 		</Subtask>
@@ -51,8 +58,8 @@
 		<Subtask name="Visualisation">
 			<Executor name="Exec2" period="0.01">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="-5">
-					<param name="count">3</param>
-					<param name="title">RGB,Pano,Warped</param>
+					<param name="count">4</param>
+					<param name="title">RGB,Pass,Valid,Mask</param>
 				</Component>
 			</Executor>
 		</Subtask>	
@@ -63,11 +70,11 @@
 	<DataStreams>
 		<Source name="Source.out_img">
 			<sink>Window.in_img0</sink>
-			<sink>Stitcher.in_img</sink>
-			<sink>Warper.in_img</sink>
+			<sink>Proxy.trigger</sink>
 		</Source>
 		<Source name="Source.out_depth">
 			<sink>ProcXYZ.in_depth</sink>
+			<sink>ProcValid.in_depth</sink>
 		</Source>
 		<Source name="Trigger.out_trigger">
 			<sink>Proxy.trigger</sink>
@@ -75,12 +82,12 @@
 		<Source name="ProcXYZ.out_depth">
 			<sink>Transformer.in_img</sink>
 		</Source>
+		<Source name="ProcValid.out_depth">
+			<sink>Window.in_img2</sink>
+			<sink>Mask.in_mask</sink>
+		</Source>
 		<Source name="Proxy.transform">
 			<sink>Transformer.in_transform</sink>
-			<sink>Warper.in_transform</sink>
-		</Source>
-		<Source name="Transformer.out_img">
-			<sink>Stitcher.in_depth</sink>
 		</Source>
 		<Source name="Transformer.lockPosition">
 			<sink>Proxy.lockPosition</sink>
@@ -89,14 +96,15 @@
 			<sink>Proxy.trigger</sink>
 			<sink>Transformer.in_point</sink>
 		</Source>
-		<Source name="Stitcher.out_img">
+		<Source name="Transformer.out_img">
+			<sink>PassThrough.in_xyz</sink>
+		</Source>
+		<Source name="PassThrough.out_mask">
 			<sink>Window.in_img1</sink>
+			<sink>Mask.in_mask</sink>
 		</Source>
-		<Source name="CameraInfo.out_camera_info">
-			<sink>Warper.in_camerainfo</sink>
-		</Source>
-		<Source name="Warper.out_img">
-			<sink>Window.in_img2</sink>
+		<Source name="Mask.out_mask">
+			<sink>Window.in_img3</sink>
 		</Source>
 	</DataStreams>
 </Task>

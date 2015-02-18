@@ -105,9 +105,9 @@ void MatTransform::onNewImage() {
 		float* p;
 		
 		cv::Vec3f ptt = img.at<cv::Vec3f>(target_pos.y, target_pos.x);
-		CLOG(LNOTICE) << ptt[0];
-		CLOG(LNOTICE) << ptt[1];
-		CLOG(LNOTICE) << ptt[2];
+		CLOG(LINFO) << ptt[0];
+		CLOG(LINFO) << ptt[1];
+		CLOG(LINFO) << ptt[2];
 		
 		for( i = 0; i < rows; ++i) {
 			p = img.ptr<float>(i);
@@ -129,10 +129,10 @@ void MatTransform::onNewImage() {
 			}
 		}
 		
-		img.at<cv::Vec3f>(target_pos.y, target_pos.x);
-		CLOG(LNOTICE) << ptt[0];
-		CLOG(LNOTICE) << ptt[1];
-		CLOG(LNOTICE) << ptt[2];
+		ptt = img.at<cv::Vec3f>(target_pos.y, target_pos.x);
+		CLOG(LINFO) << ptt[0];
+		CLOG(LINFO) << ptt[1];
+		CLOG(LINFO) << ptt[2];
 		
 		lockPosition.write(ptt);
 	} else { // double variant
@@ -140,9 +140,9 @@ void MatTransform::onNewImage() {
 		int i,j;
 		double* p;
 		cv::Vec3d ptt = img.at<cv::Vec3d>(target_pos.y, target_pos.x);
-		CLOG(LNOTICE) << ptt[0];
-		CLOG(LNOTICE) << ptt[1];
-		CLOG(LNOTICE) << ptt[2];
+		CLOG(LINFO) << ptt[0];
+		CLOG(LINFO) << ptt[1];
+		CLOG(LINFO) << ptt[2];
 		
 		for( i = 0; i < rows; ++i) {
 			p = img.ptr<double>(i);
@@ -161,9 +161,9 @@ void MatTransform::onNewImage() {
 		}
 		
 		ptt = img.at<cv::Vec3d>(target_pos.y, target_pos.x);
-		CLOG(LNOTICE) << ptt[0];
-		CLOG(LNOTICE) << ptt[1];
-		CLOG(LNOTICE) << ptt[2];
+		CLOG(LINFO) << ptt[0];
+		CLOG(LINFO) << ptt[1];
+		CLOG(LINFO) << ptt[2];
 		
 		lockPosition.write(ptt);
 	}

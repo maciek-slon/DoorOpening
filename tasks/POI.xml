@@ -1,0 +1,258 @@
+<Task>
+	<!-- reference task information -->
+	<Reference>
+		<Author>
+			<name>Maciej Stefańczyk</name>
+			<link></link>
+		</Author>
+		
+		<Description>
+			<brief>Points of interest detection</brief>
+			<full>Detection of interesting points on door (locks, handles etc.)</full>	
+		</Description>
+	</Reference>
+	
+	<!-- task definition -->
+	<Subtasks>
+		<Subtask name="Main">
+			<Executor name="Processing"  period="0.2">
+				<!-- ------------------------------------------------------- -->
+				<!-- 1. Data sources                                         -->
+				<!-- ------------------------------------------------------- -->
+				
+				<Component name="Trigger" type="CvBasic:Trigger" priority="10" bump="0">
+				</Component>
+				
+				<Component name="Source" type="CameraNUI:CameraNUI" priority="11" bump="0">
+					<param name="triggered">1</param>
+				</Component>
+				
+				<Component name="Proxy" type="DoorOpening:ROSProxy" priority="12" bump="0">
+				</Component>
+				
+				<Component name="Color" type="CvBasic:CvColorConv" priority="13" bump="0">
+					<param name="type">BGR2GRAY</param>
+				</Component>
+				
+				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="14" bump="0">
+					<param name="camera_matrix">529 0 320; 0 529 240; 0 0 1</param>
+				</Component>
+				
+				<!-- ------------------------------------------------------- -->
+				<!-- 2. Door mask estimation                                 -->
+				<!-- ------------------------------------------------------- -->
+			
+				<Component name="Threshold" type="CvBasic:CvAdaptiveThreshold" priority="21" bump="0">
+				</Component>
+				
+				<Component name="Morph" type="CvBasic:CvMorphology" priority="22" bump="0">
+				</Component>
+
+				<Component name="Canny" type="CvBasic:CvCanny" priority="23" bump="0">
+				</Component>
+
+				<Component name="Hough" type="CvBasic:CvHoughLines" priority="24" bump="0">
+					<param name="maxLineGap">50</param>
+					<param name="minLineLength">200</param>
+					<param name="threshold">70</param>
+				</Component>
+				
+				<Component name="Vanish" type="DoorOpening:VanishingPointsEstimator" priority="25" bump="0">
+				</Component>
+				
+				<!-- ------------------------------------------------------- -->
+				<!-- 3. Depth transform and pass-through mask estimation     -->
+				<!-- ------------------------------------------------------- -->
+				
+				<Component name="ProcXYZ" type="CameraNUI:DepthConverter" priority="30" bump="0">
+					<param name="depth_mode">point_cloud</param>
+				</Component>
+				
+				<Component name="ProcValid" type="CameraNUI:DepthConverter" priority="31" bump="0">
+					<param name="depth_mode">valid</param>
+				</Component>
+				
+				<Component name="Transformer" type="DoorOpening:MatTransform" priority="32" bump="0">
+				</Component>
+				
+				<Component name="PassThrough" type="Depth:PassThrough" priority="33" bump="0">
+					<param name="z_min">0.1</param>
+					<param name="z_max">1.9</param>
+				</Component>
+				
+				<!-- ------------------------------------------------------- -->
+				<!-- 4. Contour detection and filtering                      -->
+				<!-- ------------------------------------------------------- -->
+				
+				<Component name="Canny_4" type="CvBasic:CvCanny" priority="41" bump="0">
+					<param name="histeresis.higherThreshold">300</param>
+					<param name="histeresis.lowerThreshold">100</param>
+				</Component>
+				
+				<Component name="Contours" type="CvBasic:CvContour" priority="42" bump="0">
+				</Component>
+				
+				<!-- ------------------------------------------------------- -->
+				<!-- 5. Plane fitting                                        -->
+				<!-- ------------------------------------------------------- -->
+			
+				<Component name="MaskPlane" type="CvBasic:MaskAggregator" priority="50" bump="0">
+				</Component>
+				
+				<Component name="Converter" type="PCL:DepthConverter" priority="51" bump="0">
+				</Component>
+				
+				<Component name="Ransac" type="PCL:RANSACPlane" priority="52" bump="0">
+				</Component>
+			
+				<!-- ------------------------------------------------------- -->
+				<!-- 6. Points of interest and camera pose calculation       -->
+				<!-- ------------------------------------------------------- -->
+			
+				<Component name="POI" type="DoorOpening:POI" priority="60" bump="1">
+				</Component>
+				
+			</Executor>
+
+			<Executor name="Visualization" period="0.2">
+				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
+					<param name="count">6</param>
+					<param name="title">RGB,MaskRGB,MaskValid,MaskPT,Contours,MaskPlane</param>
+				</Component>
+			</Executor>
+		</Subtask>
+	
+	</Subtasks>
+	
+	<!-- pipes connecting datastreams -->
+	<DataStreams>
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- 1. Data sources                                         -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="Trigger.out_trigger">
+			<sink>Proxy.trigger</sink>
+			<sink>Source.trigger</sink>
+		</Source>
+		
+		<Source name="Source.out_img">
+			<sink>Window.in_img0</sink>
+			<sink>Color.in_img</sink>
+		</Source>
+		
+		<Source name="Source.out_depth">
+			<sink>ProcXYZ.in_depth</sink> <!-- 3 -->
+			<sink>ProcValid.in_depth</sink> <!-- 3 -->
+		</Source>
+		
+		<Source name="Color.out_img">
+			<sink>Threshold.in_img</sink> <!-- 2 -->
+			<sink>Canny_4.in_img</sink> <!-- 4 -->
+		</Source>
+		
+		<Source name="Proxy.transform">
+			<sink>Transformer.in_transform</sink> <!-- 3 -->
+			<sink>POI.in_transform</sink> <!-- 6 -->
+		</Source>
+		
+		<Source name="CameraInfo.out_camera_info">
+			<sink>POI.in_camera_info</sink> <!-- 6 -->
+		</Source>
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- 2. Door mask estimation                                 -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="Threshold.out_img">
+			<sink>Morph.in_img</sink>	
+		</Source>
+		
+		<Source name="Morph.out_img">
+			<sink>Canny.in_img</sink>	
+		</Source>
+		
+		<Source name="Canny.out_img">
+			<sink>Hough.in_img</sink>
+		</Source>
+		
+		<Source name="Hough.out_lines">
+			<sink>Vanish.in_lines</sink>	
+		</Source>
+		
+		<Source name="Vanish.out_lines">
+			<sink>Window.in_draw0</sink>
+		</Source>
+		
+		<Source name="Vanish.out_mask">
+			<sink>Window.in_img1</sink>
+			<sink>Canny_4.in_mask</sink> <!-- 4 -->
+			<sink>MaskPlane.in_mask</sink> <!-- 5 -->
+		</Source>
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- 3. Depth transform and pass-through mask estimation     -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="ProcXYZ.out_depth">
+			<sink>Transformer.in_img</sink>
+		</Source>
+		
+		<Source name="ProcValid.out_depth">
+			<sink>Window.in_img2</sink>
+			<sink>MaskPlane.in_mask</sink> <!-- 5 -->
+		</Source>
+		
+		<Source name="Transformer.out_img">
+			<sink>PassThrough.in_xyz</sink>
+			<sink>Converter.in_depth_xyz</sink> <!-- 5 -->
+		</Source>
+		
+		<Source name="PassThrough.out_mask">
+			<sink>Window.in_img3</sink>
+			<sink>MaskPlane.in_mask</sink> <!-- 5 -->
+		</Source>
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- 4. Contour detection and filtering                      -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="Canny_4.out_img">
+			<sink>Contours.in_img</sink>
+		</Source>
+		
+		<Source name="Contours.out_img">
+			<sink>Window.in_img4</sink>
+		</Source>
+		
+		<Source name="Contours.out_contours">
+			<sink>POI.in_contours</sink> <!-- 6 -->
+		</Source>
+		
+		<Source name="Contours.out_moments">
+			<sink>POI.in_moments</sink> <!-- 6 -->
+		</Source>
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- 5. Plane fitting                                        -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="MaskPlane.out_mask">
+			<sink>Converter.in_mask</sink>
+			<sink>Window.in_img5</sink>
+		</Source>
+		
+		<Source name="Converter.out_cloud_xyz">
+			<sink>Ransac.in_xyz</sink>
+		</Source>
+		
+		<Source name="Ransac.out_model">
+			<sink>POI.in_plane</sink> <!-- 6 -->
+		</Source>
+		
+	</DataStreams>
+</Task>
+
+
+
+

@@ -21,13 +21,13 @@
 					<param name="sequence.pattern">frame.*\.jpg</param>
 					<param name="mode.loop">1</param>
 					<param name="mode.iterate">1</param>
+					<param name="mode.auto_next_image">0</param>
 				</Component>
 				
 				<Component name="Color" type="CvBasic:CvColorConv" priority="2" bump="0">
 					<param name="type">BGR2GRAY</param>			
 				</Component>
 		
-
 				<Component name="Threshold" type="CvBasic:CvAdaptiveThreshold" priority="60" bump="0">
 				</Component>
 				
@@ -45,12 +45,19 @@
 				
 				<Component name="Vanish" type="DoorOpening:VanishingPointsEstimator" priority="90" bump="0">
 				</Component>
+				
+				<Component name="Canny2" type="CvBasic:CvCanny" priority="100" bump="0">
+				</Component>
+				
+				<Component name="Contours" type="CvBasic:CvContour" priority="110" bump="0">
+				</Component>
+				
 			</Executor>
 
 			<Executor name="Visualization" period="0.2">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">4</param>
-					<param name="title">In,Thr,Lines,Canny</param>
+					<param name="count">7</param>
+					<param name="title">In,Thr,Lines,Canny,Mask,Canny2,Contours</param>
 				</Component>
 			</Executor>
 		</Subtask>	
@@ -66,6 +73,7 @@
 		</Source>
 		<Source name="Color.out_img">
 			<sink>Threshold.in_img</sink>
+			<sink>Canny2.in_img</sink>
 		</Source>
 		<Source name="Threshold.out_img">
 			<sink>Morph.in_img</sink>	
@@ -89,6 +97,17 @@
 		</Source>		
 		<Source name="Vanish.out_lines">
 			<sink>Window.in_draw2</sink>	
+		</Source>
+		<Source name="Vanish.out_mask">
+			<sink>Window.in_img4</sink>	
+			<sink>Canny2.in_mask</sink>
+		</Source>
+		<Source name="Canny2.out_img">
+			<sink>Window.in_img5</sink>
+			<sink>Contours.in_img</sink>
+		</Source>
+		<Source name="Contours.out_img">
+			<sink>Window.in_img6</sink>
 		</Source>
 	</DataStreams>
 </Task>

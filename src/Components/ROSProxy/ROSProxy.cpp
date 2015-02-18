@@ -105,9 +105,10 @@ void ROSProxy::onTrigger() {
 			tf_mat.at<double>(i, 3) = transform.getOrigin()[i];
 		}
 		
-		CLOG(LNOTICE) << tf_mat;
-	} catch(...) {}
-	
+		CLOG(LINFO) << tf_mat;
+	} catch(...) {
+		CLOG(LWARNING) << "No tf!";
+	}
 	
 	transform.write(tf_mat);
 }

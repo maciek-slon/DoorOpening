@@ -68,14 +68,15 @@ protected:
 	bool onStop();
 
 
-// Input data streams
+	// Input data streams
 
-		Base::DataStreamIn<Types::DrawableContainer> in_lines;
+	Base::DataStreamIn<Types::DrawableContainer> in_lines;
 
-// Output data streams
+	// Output data streams
 
-		Base::DataStreamOut<Types::DrawableContainer> out_lines;
-		Base::DataStreamOut<Types::DrawableContainer> out_points;
+	Base::DataStreamOut<Types::DrawableContainer> out_lines;
+	Base::DataStreamOut<Types::DrawableContainer> out_points;
+	Base::DataStreamOut<cv::Mat> out_mask;
 	// Handlers
 	Base::EventHandler2 h_onNewLines;
 
