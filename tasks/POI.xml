@@ -250,6 +250,10 @@
 			<sink>POI.in_plane</sink> <!-- 6 -->
 		</Source>
 		
+		<Source name="POI.out_points">
+			<sink>Proxy.lockPosition</sink>
+		</Source>
+		
 	</DataStreams>
 </Task>
 

@@ -10,6 +10,8 @@
 #include "ROSProxy.hpp"
 #include "Common/Logger.hpp"
 
+#include "geometry_msgs/PoseStamped.h"
+
 #include <boost/bind.hpp>
 
 namespace Processors {
@@ -45,7 +47,7 @@ bool ROSProxy::onInit() {
 	ros::init(tmpi, &tmp, std::string("discode"), ros::init_options::NoSigintHandler);
 	nh = new ros::NodeHandle;
 	listener = new tf::TransformListener;
-	pub = nh->advertise<std_msgs::Int32>("from_discode", 1000);
+	pub = nh->advertise<geometry_msgs::PoseStamped>("poi_poses", 1000);
 	sub = nh->subscribe("my_topic", 1, &ROSProxy::callback, this);
 	
 	return true;
@@ -68,21 +70,60 @@ void ROSProxy::spin() {
 	ros::spinOnce();
 }
 
-void ROSProxy::onNewData() {
-//	std_msgs::Int32 msg;
-//	msg.data = in_data.read();
-//	msg.data = 5;
-//	pub.publish(msg);
-	
-	cv::Vec3d pos = lockPosition.read();
+void ROSProxy::onNewData() {	
+	std::vector<cv::Vec6f> points = lockPosition.read();
 	
 	static tf::TransformBroadcaster br;
-	tf::Transform transform;
-	transform.setOrigin( tf::Vector3(pos[0], pos[1], pos[2]) );
-	tf::Quaternion q;
-	q.setRPY(0, 0, 0);
-	transform.setRotation(q);
-	br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/torso_base", "/tmp_lock"));
+	for (int i = 0; i < points.size(); ++i) {
+		tf::Transform transform, transform2, transform3;
+		transform.setOrigin( tf::Vector3(points[i][0], points[i][1], points[i][2]) );
+		
+		cv::Vec3f n;
+		n[0] = points[i][3];
+		n[1] = points[i][4];
+		n[2] = points[i][5];
+		
+		transform2.setOrigin( tf::Vector3(-0.7, 0, 0) );
+		
+		cv::Vec3f x;
+		x[0] = 1;
+		x[1] = 0;
+		x[2] = 0;
+		
+		cv::Vec3f w = x.cross(n);
+		
+		tf::Quaternion q(w[0], w[1], w[2], 1.f + x.dot(n));
+		q.normalize();
+		
+		transform.setRotation(q);
+		transform2.setRotation(tf::Quaternion(tf::Vector3(0, 0, 1), 3.1415));
+		std::string name = "/tmp_lock_";
+		name += ('0'+i);
+		std::string name2 = "/look_lock_";
+		name2 += ('0'+i);
+		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/torso_base", name));
+		//br.sendTransform(tf::StampedTransform(transform2, ros::Time::now(), name, name2));
+		
+		transform3 = transform * transform2;
+		br.sendTransform(tf::StampedTransform(transform3, ros::Time::now(), "/torso_base", name2));
+		
+		geometry_msgs::PoseStamped pose;
+		pose.header.stamp = ros::Time::now();
+		pose.header.frame_id = "/torso_base";
+		tf::Vector3 origin = transform3.getOrigin();
+		tf::Quaternion quaternion = transform3.getRotation();
+		pose.pose.position.x = origin.x();
+		pose.pose.position.y = origin.y();
+		pose.pose.position.z = origin.z();
+		pose.pose.orientation.x = quaternion.x();
+		pose.pose.orientation.y = quaternion.y();
+		pose.pose.orientation.z = quaternion.z();
+		pose.pose.orientation.w = quaternion.w();
+		
+		pub.publish(pose);
+		
+		CLOG(LNOTICE) << "Sending transform " << points[i];
+	}
 }
 
 void ROSProxy::callback(const std_msgs::Int32ConstPtr& msg) {

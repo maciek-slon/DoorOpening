@@ -73,7 +73,7 @@ protected:
 
 	// Input data streams
 	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<cv::Vec3d> lockPosition;
+	Base::DataStreamIn<std::vector<cv::Vec6f> > lockPosition;
 
 	// Output data streams
 	Base::DataStreamOut<cv::Mat> transform;

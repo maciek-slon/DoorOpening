@@ -35,6 +35,7 @@ void POI::prepareInterface() {
 	registerStream("out_points", &out_points);
 	// Register handlers
 	registerHandler("readPlane", boost::bind(&POI::readPlane, this));
+	registerHandler("sendPoints", boost::bind(&POI::sendPoints, this));
 	registerHandler("readPoints", boost::bind(&POI::readPoints, this));
 	addDependency("readPoints", &in_contours);
 	addDependency("readPoints", &in_moments);
@@ -138,7 +139,35 @@ void POI::readPoints() {
 		
 		cv::Vec3f pos = l0 + c * d;
 		CLOG(LINFO) << "Calculated pos: " << pos;
+		
+		points.push_back(pos);
 	}
+}
+
+void POI::sendPoints() {
+	std::vector<cv::Vec6f> vec_points;
+	for (int i = 0; i < points.size(); ++i) {
+		cv::Vec6f pt;
+		pt[0] = points[i][0];
+		pt[1] = points[i][1];
+		pt[2] = points[i][2];
+		
+		/*
+		cv::Vec3f z;
+		z[0] = 0;
+		z[1] = 0;
+		z[2] = 1;
+		
+		y = z.cross(n);*/
+		
+		pt[3] = n[0];
+		pt[4] = n[1];
+		pt[5] = n[2];
+		
+		vec_points.push_back(pt);
+	}
+	
+	out_points.write(vec_points);
 }
 
 

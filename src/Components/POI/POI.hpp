@@ -77,7 +77,7 @@ protected:
 	Base::DataStreamIn<std::vector<float>, Base::DataStreamBuffer::Newest > in_plane;
 
 	// Output data streams
-	Base::DataStreamOut<std::vector<cv::Point3f> > out_points;
+	Base::DataStreamOut<std::vector<cv::Vec6f> > out_points;
 
 	// Handlers
 
@@ -87,12 +87,13 @@ protected:
 	// Handlers
 	void readPlane();
 	void readPoints();
+	void sendPoints();
 	
 	// plane equation: normal and point
 	cv::Vec3f n;
 	cv::Vec3f p0;
 	
-	std::vector<cv::Point3f> points;
+	std::vector<cv::Vec3f> points;
 
 };
 
