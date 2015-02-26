@@ -67,12 +67,15 @@
 				
 				<Component name="Sum" type="CvBasic:Sum" priority="70" bump="0">
 				</Component>
+				
+				<Component name="Detector" type="DoorOpening:KeyholeDetector" priority="80" bump="0">
+				</Component>
 			</Executor>
 
 			<Executor name="Visualization" period="0.2">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">4</param>
-					<param name="title">Model,Object,Matches,Transform</param>
+					<param name="count">5</param>
+					<param name="title">Model,Object,Matches,Transform,Edges</param>
 				</Component>
 			</Executor>
 		</Subtask>
@@ -130,7 +133,7 @@
 		</Source>
 		
 		<Source name="Window.out_point0">
-			<sink>Transform.in_point</sink>
+			<sink>Detector.in_point</sink>
 		</Source>
 		
 		<Source name="Transform.out_draw">
@@ -143,6 +146,7 @@
 		
 		<Source name="EdgeColor.out_img">
 			<sink>Sum.in_img2</sink>
+			<sink>Window.in_img4</sink>
 		</Source>
 		
 		<Source name="Sum.out_img">

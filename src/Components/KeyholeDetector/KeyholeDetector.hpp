@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef ROSPROXY_HPP_
-#define ROSPROXY_HPP_
+#ifndef KEYHOLEDETECTOR_HPP_
+#define KEYHOLEDETECTOR_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -13,33 +13,31 @@
 #include "Property.hpp"
 #include "EventHandler2.hpp"
 
-#include "ros/ros.h"
-#include "std_msgs/Int32.h"
-#include "tf/transform_listener.h"
-#include "tf/transform_broadcaster.h"
-
 #include <opencv2/opencv.hpp>
 
+#include "Types/CameraInfo.hpp"
+
+
 namespace Processors {
-namespace ROSProxy {
+namespace KeyholeDetector {
 
 /*!
- * \class ROSProxy
- * \brief ROSProxy processor class.
+ * \class KeyholeDetector
+ * \brief KeyholeDetector processor class.
  *
  * 
  */
-class ROSProxy: public Base::Component {
+class KeyholeDetector: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	ROSProxy(const std::string & name = "ROSProxy");
+	KeyholeDetector(const std::string & name = "KeyholeDetector");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~ROSProxy();
+	virtual ~KeyholeDetector();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -72,13 +70,14 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger;
-	Base::DataStreamIn<Base::UnitType, Base::DataStreamBuffer::Newest> trigger2;
-	Base::DataStreamIn<std::vector<cv::Vec6f> > lockPosition;
+	Base::DataStreamIn<cv::Mat, Base::DataStreamBuffer::Newest> in_homography;
+	Base::DataStreamIn<cv::Point2f> in_point;
+	Base::DataStreamIn<cv::Vec6f, Base::DataStreamBuffer::Newest> in_plane;
+	Base::DataStreamIn<cv::Mat, Base::DataStreamBuffer::Newest> in_transform;
+	Base::DataStreamIn<Types::CameraInfo, Base::DataStreamBuffer::Newest> in_camera_info;
 
 	// Output data streams
-	Base::DataStreamOut<cv::Mat> transform;
-	Base::DataStreamOut<cv::Mat> transform2;
+	Base::DataStreamOut<cv::Point3f> out_point;
 
 	// Handlers
 
@@ -86,27 +85,21 @@ protected:
 
 	
 	// Handlers
-	void spin();
+	void onNewPoint();
 	void onNewData();
-	void onTrigger();
-	void onTrigger2();
+	void readPlane();
 	
-	ros::Publisher pub;
-	ros::Subscriber sub;
-	ros::NodeHandle * nh;
+	cv::Point2f point;
+	cv::Vec3f n0, n;
 	
-	tf::TransformListener * listener;
-
-	void callback(const std_msgs::Int32ConstPtr& msg);
-
 };
 
-} //: namespace ROSProxy
+} //: namespace KeyholeDetector
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("ROSProxy", Processors::ROSProxy::ROSProxy)
+REGISTER_COMPONENT("KeyholeDetector", Processors::KeyholeDetector::KeyholeDetector)
 
-#endif /* ROSPROXY_HPP_ */
+#endif /* KEYHOLEDETECTOR_HPP_ */

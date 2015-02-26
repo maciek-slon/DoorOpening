@@ -29,7 +29,9 @@ void ROSProxy::prepareInterface() {
 	// Register data streams, events and event handlers HERE!
 	registerStream("lockPosition", &lockPosition);
 	registerStream("transform", &transform);
+	registerStream("transform2", &transform2);
 	registerStream("trigger", &trigger);
+	registerStream("trigger2", &trigger2);
 	// Register handlers
 	registerHandler("spin", boost::bind(&ROSProxy::spin, this));
 	addDependency("spin", NULL);
@@ -39,6 +41,9 @@ void ROSProxy::prepareInterface() {
 	
 	registerHandler("onTrigger", boost::bind(&ROSProxy::onTrigger, this));
 	addDependency("onTrigger", &trigger);
+	
+	registerHandler("onTrigger2", boost::bind(&ROSProxy::onTrigger2, this));
+	addDependency("onTrigger2", &trigger2);
 }
 
 bool ROSProxy::onInit() {
@@ -114,7 +119,7 @@ void ROSProxy::onNewData() {
 		tf::Quaternion quaternion = transform3.getRotation();
 		pose.pose.position.x = origin.x();
 		pose.pose.position.y = origin.y();
-		pose.pose.position.z = origin.z();
+		pose.pose.position.z = origin.z() + 0.05;
 		pose.pose.orientation.x = quaternion.x();
 		pose.pose.orientation.y = quaternion.y();
 		pose.pose.orientation.z = quaternion.z();
@@ -152,6 +157,30 @@ void ROSProxy::onTrigger() {
 	}
 	
 	transform.write(tf_mat);
+}
+
+void ROSProxy::onTrigger2() {
+	trigger2.read();
+	
+	cv::Mat tf_mat = cv::Mat::eye(4,4,CV_64FC1);
+	
+	try {
+		tf::StampedTransform transform;
+		listener->lookupTransform("/torso_base", "/left_hand_camera_optical_frame", ros::Time(0), transform);
+	
+		for (int i = 0; i < 3; ++i) {
+			tf_mat.at<double>(i, 0) = transform.getBasis()[i][0];
+			tf_mat.at<double>(i, 1) = transform.getBasis()[i][1];
+			tf_mat.at<double>(i, 2) = transform.getBasis()[i][2];
+			tf_mat.at<double>(i, 3) = transform.getOrigin()[i];
+		}
+		
+		CLOG(LINFO) << tf_mat;
+	} catch(...) {
+		CLOG(LWARNING) << "No tf!";
+	}
+	
+	transform2.write(tf_mat);
 }
 
 

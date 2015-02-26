@@ -14,3 +14,7 @@ ADD_COMPONENT(Warper)
 ADD_COMPONENT(ModelReader)
 
 ADD_COMPONENT(POI)
+
+ADD_COMPONENT(KeyholeDetector)
+
+ADD_COMPONENT(PlaneGenerator)

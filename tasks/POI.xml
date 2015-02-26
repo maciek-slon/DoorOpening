@@ -20,6 +20,15 @@
 				<!-- 1. Data sources                                         -->
 				<!-- ------------------------------------------------------- -->
 				
+				<Component name="Plane" type="DoorOpening:PlaneGenerator" priority="1">
+					<param name="px">1.0620</param>
+					<param name="py">0.1400</param>
+					<param name="pz">1.4070</param>
+					<param name="nx">0.9811</param>
+					<param name="ny">-0.1908</param>
+					<param name="nz">0.0322</param>
+				</Component>
+				
 				<Component name="Trigger" type="CvBasic:Trigger" priority="10" bump="0">
 				</Component>
 				
@@ -115,9 +124,72 @@
 			</Executor>
 
 			<Executor name="Visualization" period="0.2">
-				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">6</param>
-					<param name="title">RGB,MaskRGB,MaskValid,MaskPT,Contours,MaskPlane</param>
+				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="-10">
+					<param name="count">10</param>
+					<param name="title">RGB,MaskRGB,MaskValid,MaskPT,Contours,MaskPlane,Model,Objects,Matches,Transform</param>
+				</Component>
+			</Executor>
+			
+			<Executor name="Keyhole" period="2">
+				<Component name="CameraInfoX" type="CvCoreTypes:CameraInfoProvider" priority="1" bump="0">
+					<param name="camera_matrix">3053.13624 0 649; 0 3034.73676 440.5; 0 0 1</param>
+					<param name="dist_coeffs">-0.31407 0.4572 -0.00718 -0.00015 0.0</param>
+				</Component>
+				
+				<Component name="CameraInfoY" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
+					<param name="camera_matrix">3010.93091 0 648.9; 0 3005.94409 437.8; 0 0 1</param>
+				</Component>
+				
+				<Component name="Model" type="CvBasic:Sequence" priority="10" bump="0">
+					<param name="sequence.directory">%[TASK_LOCATION]%/../data/zamki/</param>
+					<param name="sequence.pattern">mod.*\.jpg</param>
+					<param name="mode.loop">1</param>
+					<param name="mode.auto_next_image">0</param>
+				</Component>
+
+				<Component name="Object" type="CameraGigE:CameraGigE" priority="11" bump="0">
+					<param name="device.address">192.168.1.2</param>
+					<param name="image.exposure.mode">Manual</param>
+					<param name="image.exposure.value">0.025</param>
+				</Component>
+				
+				<Component name="Undistort" type="CvBasic:CvUndistort" priority="12">
+				</Component>
+				
+				<Component name="ModelColor" type="CvBasic:CvColorConv" priority="13">
+					<param name="type">BGR2GRAY</param>
+				</Component>
+				
+				<Component name="ObjectColor" type="CvBasic:CvColorConv" priority="14">
+					<param name="type">BGR2GRAY</param>
+				</Component>
+				
+				<Component name="Canny_X" type="CvBasic:CvCanny" priority="15" bump="0">
+				</Component>
+				
+				<Component name="Features" type="CvBasic:FeatureDetector" priority="20">
+				</Component>
+				
+				<Component name="Matcher" type="CvBasic:CvBruteForce" priority="30">
+					<param name="print_stats">0</param>
+					<param name="recalculate_distance">0</param>
+					<param name="distance">50</param>
+				</Component>
+				
+				<Component name="Calc" type="CvBasic:FindHomography" priority="31" bump="0">
+				</Component>
+				
+				<Component name="Transform" type="CvBasic:PerspectiveTransform" priority="32" bump="0">
+				</Component>
+				
+				<Component name="EdgeColor" type="CvBasic:CvColorConv" priority="33">
+					<param name="type">GRAY2BGR</param>
+				</Component>
+				
+				<Component name="Sum" type="CvBasic:Sum" priority="34" bump="0">
+				</Component>
+				
+				<Component name="Detector" type="DoorOpening:KeyholeDetector" priority="40" bump="0">
 				</Component>
 			</Executor>
 		</Subtask>
@@ -131,8 +203,14 @@
 		<!-- 1. Data sources                                         -->
 		<!-- ------------------------------------------------------- -->
 		
+		<Source name="Plane.out_plane">
+			<sink>POI.in_plane</sink> <!-- 6 -->
+			<sink>Detector.in_plane</sink> <!-- X -->
+		</Source>
+		
 		<Source name="Trigger.out_trigger">
 			<sink>Proxy.trigger</sink>
+			<sink>Proxy.trigger2</sink>
 			<sink>Source.trigger</sink>
 		</Source>
 		
@@ -154,6 +232,10 @@
 		<Source name="Proxy.transform">
 			<sink>Transformer.in_transform</sink> <!-- 3 -->
 			<sink>POI.in_transform</sink> <!-- 6 -->
+		</Source>
+		
+		<Source name="Proxy.transform2">
+			<sink>Detector.in_transform</sink> <!-- X -->
 		</Source>
 		
 		<Source name="CameraInfo.out_camera_info">
@@ -248,10 +330,107 @@
 		
 		<Source name="Ransac.out_model">
 			<sink>POI.in_plane</sink> <!-- 6 -->
+			<sink>Detector.in_plane</sink> <!-- X -->
 		</Source>
 		
 		<Source name="POI.out_points">
 			<sink>Proxy.lockPosition</sink>
+		</Source>
+		
+		
+		
+		
+		<!-- ------------------------------------------------------- -->
+		<!-- X. Keyhole detection                                    -->
+		<!-- ------------------------------------------------------- -->
+		
+		<Source name="CameraInfoX.out_camera_info">
+			<sink>Undistort.in_camera_info</sink> 
+		</Source>
+		
+		<Source name="CameraInfoY.out_camera_info">
+			<sink>Detector.in_camera_info</sink> 
+		</Source>
+		
+		<Source name="Model.out_img">
+			<sink>Window.in_img6</sink>
+			<sink>Matcher.in_img0</sink>
+			<sink>ModelColor.in_img</sink>
+		</Source>
+		
+		<Source name="ModelColor.out_img">
+			<sink>Features.in_img_A</sink>
+			<sink>Canny_X.in_img</sink>
+		</Source>
+		
+		<Source name="Canny_X.out_img">
+			<sink>Transform.in_img</sink>
+		</Source>
+		
+		<Source name="Features.out_features_A">
+			<sink>Matcher.in_features0</sink>
+			<sink>Calc.in_features0</sink>
+		</Source>
+		
+		<Source name="Features.out_descriptors_A">
+			<sink>Matcher.in_descriptors0</sink>
+		</Source>
+		
+		<Source name="Object.out_img">
+			<sink>Undistort.in_img</sink>
+		</Source>
+		
+		<Source name="Undistort.out_img">
+			<sink>Window.in_img7</sink>
+			<sink>Matcher.in_img1</sink>
+			<sink>ObjectColor.in_img</sink>
+			<sink>Sum.in_img1</sink>
+		</Source>
+		
+		<Source name="ObjectColor.out_img">
+			<sink>Features.in_img_B</sink>
+		</Source>
+		
+		<Source name="Features.out_features_B">
+			<sink>Matcher.in_features1</sink>
+			<sink>Calc.in_features1</sink>
+		</Source>
+		
+		<Source name="Features.out_descriptors_B">
+			<sink>Matcher.in_descriptors1</sink>
+		</Source>
+		
+		<Source name="Matcher.out_img">
+			<sink>Window.in_img8</sink>
+		</Source>
+		
+		<Source name="Window.out_point6">
+			<sink>Detector.in_point</sink>
+		</Source>
+		
+		<Source name="Transform.out_draw">
+			<sink>Window.in_draw7</sink>
+		</Source>
+		
+		<Source name="Transform.out_img">
+			<sink>EdgeColor.in_img</sink>
+		</Source>
+		
+		<Source name="EdgeColor.out_img">
+			<sink>Sum.in_img2</sink>
+		</Source>
+		
+		<Source name="Sum.out_img">
+			<sink>Window.in_img9</sink>
+		</Source>
+		
+		<Source name="Matcher.out_matches">
+			<sink>Calc.in_matches</sink>
+		</Source>
+		
+		<Source name="Calc.out_homography">
+			<sink>Transform.in_homography</sink>
+			<sink>Detector.in_homography</sink>
 		</Source>
 		
 	</DataStreams>

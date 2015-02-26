@@ -4,8 +4,8 @@
  * \author Maciej Stefanczyk
  */
 
-#ifndef POI_HPP_
-#define POI_HPP_
+#ifndef PLANEGENERATOR_HPP_
+#define PLANEGENERATOR_HPP_
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -15,29 +15,27 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "Types/CameraInfo.hpp"
-
 
 namespace Processors {
-namespace POI {
+namespace PlaneGenerator {
 
 /*!
- * \class POI
- * \brief POI processor class.
+ * \class PlaneGenerator
+ * \brief PlaneGenerator processor class.
  *
  * 
  */
-class POI: public Base::Component {
+class PlaneGenerator: public Base::Component {
 public:
 	/*!
 	 * Constructor.
 	 */
-	POI(const std::string & name = "POI");
+	PlaneGenerator(const std::string & name = "PlaneGenerator");
 
 	/*!
 	 * Destructor
 	 */
-	virtual ~POI();
+	virtual ~PlaneGenerator();
 
 	/*!
 	 * Prepare components interface (register streams and handlers).
@@ -70,40 +68,32 @@ protected:
 
 
 	// Input data streams
-	Base::DataStreamIn<std::vector< std::vector<cv::Point> > > in_contours;
-	Base::DataStreamIn<std::vector< cv::Moments > > in_moments;
-	Base::DataStreamIn<Types::CameraInfo> in_camera_info;
-	Base::DataStreamIn<cv::Mat> in_transform;
-	//Base::DataStreamIn<std::vector<float>, Base::DataStreamBuffer::Newest > in_plane;
-	Base::DataStreamIn<cv::Vec6f, Base::DataStreamBuffer::Newest > in_plane;
 
 	// Output data streams
-	Base::DataStreamOut<std::vector<cv::Vec6f> > out_points;
+	Base::DataStreamOut<cv::Vec6f> out_plane;
 
 	// Handlers
 
 	// Properties
+	Base::Property<float> px;
+	Base::Property<float> py;
+	Base::Property<float> pz;
+	Base::Property<float> nx;
+	Base::Property<float> ny;
+	Base::Property<float> nz;
 
 	
 	// Handlers
-	void readPlane();
-	void readPoints();
-	void sendPoints();
-	
-	// plane equation: normal and point
-	cv::Vec3f n;
-	cv::Vec3f p0;
-	
-	std::vector<cv::Vec3f> points;
+	void sendPlane();
 
 };
 
-} //: namespace POI
+} //: namespace PlaneGenerator
 } //: namespace Processors
 
 /*
  * Register processor component.
  */
-REGISTER_COMPONENT("POI", Processors::POI::POI)
+REGISTER_COMPONENT("PlaneGenerator", Processors::PlaneGenerator::PlaneGenerator)
 
-#endif /* POI_HPP_ */
+#endif /* PLANEGENERATOR_HPP_ */

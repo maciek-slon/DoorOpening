@@ -63,13 +63,21 @@ bool POI::onStart() {
 
 void POI::readPlane() {
 	if (!in_plane.empty()) {
-		std::vector<float> plane = in_plane.read();
+		/*std::vector<float> plane = in_plane.read();
 		
 		n[0] = plane[0];
 		n[1] = plane[1];
 		n[2] = plane[2];
 		
-		p0 = n * fabs(plane[3]);
+		p0 = n * fabs(plane[3]);*/
+		
+		cv::Vec6f plane = in_plane.read();
+		p0[0] = plane[0];
+		p0[1] = plane[1];
+		p0[2] = plane[2];
+		n[0] = plane[3];
+		n[1] = plane[4];
+		n[2] = plane[5];
 		
 		CLOG(LINFO) << "Plane: " << n << ", " << p0;
 	}
