@@ -18,3 +18,5 @@ ADD_COMPONENT(POI)
 ADD_COMPONENT(KeyholeDetector)
 
 ADD_COMPONENT(PlaneGenerator)
+
+ADD_COMPONENT(DoorAngleDetector)

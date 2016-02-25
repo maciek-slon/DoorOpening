@@ -15,49 +15,64 @@
 	<!-- task definition -->
 	<Subtasks>
 		<Subtask name="Main">
-			<Executor name="Processing"  period="0.2">
-				<Component name="Sequence" type="CvBasic:Sequence" priority="1" bump="0">
+			<Executor name="Processing"  period="1">
+				<!--<Component name="Sequence" type="CvBasic:Sequence" priority="1" bump="-3">
 					<param name="sequence.directory">%[TASK_LOCATION]%/../data/</param>
-					<param name="sequence.pattern">frame.*\.jpg</param>
+					<param name="sequence.pattern">door.*\.png</param>
 					<param name="mode.loop">1</param>
 					<param name="mode.iterate">1</param>
 					<param name="mode.auto_next_image">0</param>
+				</Component>-->
+				
+				<Component name="Sequence" type="CameraNUI:CameraNUI" priority="1" bump="0">
+					<param name="lib">freenect</param>
+					<param name="skip_stop">1</param>
+					<param name="camera_mode">rgb</param>
+					<param name="sync">1</param>
+					<param name="index">0</param>
 				</Component>
 				
 				<Component name="Color" type="CvBasic:CvColorConv" priority="2" bump="0">
-					<param name="type">BGR2GRAY</param>			
+					<param name="type">BGR2GRAY</param>
 				</Component>
 		
 				<Component name="Threshold" type="CvBasic:CvAdaptiveThreshold" priority="60" bump="0">
+					<param name="C">3</param>
+					<param name="blockSize">1</param>
+					<param name="method">ADAPTIVE_THRESH_GAUSSIAN_C</param>
+					<param name="thresholdType">THRESH_BINARY_INV</param>
 				</Component>
 				
-				<Component name="Morph" type="CvBasic:CvMorphology" priority="65" bump="0">	</Component>
+				<Component name="Morph" type="CvBasic:CvMorphology" priority="65" bump="0">
+					<param name="iterations">0</param>
+				</Component>
 				
-				<Component name="Morph2" type="CvBasic:CvMorphology" priority="66" bump="0">	</Component>
+				<Component name="Morph2" type="CvBasic:CvMorphology" priority="66" bump="0">
+					<param name="iterations">0</param>
+				</Component>
 				
-				<Component name="Morph3" type="CvBasic:CvMorphology" priority="67" bump="0">	</Component>
+				<Component name="Morph3" type="CvBasic:CvMorphology" priority="67" bump="0">
+					<param name="iterations">0</param>
+				</Component>
 
 				<Component name="Canny" type="CvBasic:CvCanny" priority="70" bump="0">
 				</Component>
 
 				<Component name="Hough" type="CvBasic:CvHoughLines" priority="80" bump="0">
+					<param name="maxLineGap">20</param>
+					<param name="minLineLength">60</param>
+					<param name="threshold">80</param>
 				</Component>
 				
-				<Component name="Vanish" type="DoorOpening:VanishingPointsEstimator" priority="90" bump="0">
-				</Component>
-				
-				<Component name="Canny2" type="CvBasic:CvCanny" priority="100" bump="0">
-				</Component>
-				
-				<Component name="Contours" type="CvBasic:CvContour" priority="110" bump="0">
+				<Component name="Angle" type="DoorOpening:DoorAngleDetector" priority="90" bump="0">
 				</Component>
 				
 			</Executor>
 
 			<Executor name="Visualization" period="0.2">
 				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">
-					<param name="count">7</param>
-					<param name="title">In,Thr,Lines,Canny,Mask,Canny2,Contours</param>
+					<param name="count">5</param>
+					<param name="title">In,Thr,Lines,Canny,Mask</param>
 				</Component>
 			</Executor>
 		</Subtask>	
@@ -73,10 +88,10 @@
 		</Source>
 		<Source name="Color.out_img">
 			<sink>Threshold.in_img</sink>
-			<sink>Canny2.in_img</sink>
 		</Source>
 		<Source name="Threshold.out_img">
 			<sink>Morph.in_img</sink>	
+			<sink>Hough.in_img</sink>
 		</Source>
 		<Source name="Morph.out_img">
 			<sink>Morph2.in_img</sink>		
@@ -89,26 +104,18 @@
 			<sink>Canny.in_img</sink>	
 		</Source>
 		<Source name="Canny.out_img">
-			<sink>Hough.in_img</sink>
+			<!--<sink>Hough.in_img</sink>-->
 			<sink>Window.in_img3</sink>
 		</Source>
 		<Source name="Hough.out_lines">
-			<sink>Vanish.in_lines</sink>
+			<sink>Angle.in_lines</sink>
 			<sink>Window.in_draw0</sink>
 		</Source>		
-		<Source name="Vanish.out_lines">
+		<Source name="Angle.out_lines">
 			<sink>Window.in_draw2</sink>	
 		</Source>
-		<Source name="Vanish.out_mask">
-			<sink>Window.in_img4</sink>	
-			<sink>Canny2.in_mask</sink>
-		</Source>
-		<Source name="Canny2.out_img">
-			<sink>Window.in_img5</sink>
-			<sink>Contours.in_img</sink>
-		</Source>
-		<Source name="Contours.out_img">
-			<sink>Window.in_img6</sink>
+		<Source name="Angle.out_mask">
+			<sink>Window.in_img4</sink>
 		</Source>
 	</DataStreams>
 </Task>
